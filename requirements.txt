@@ -1,0 +1,5 @@
+#Requirements file
+
+argparse
+pycurl
+termcolor
