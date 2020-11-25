@@ -2,11 +2,11 @@
 
 Don't Run Away From Me is a fast multi-threading Python 3 web crawler.
 It's features include:
-    * Obtain all web pages in seconds.
-    * Distinguish between pages, documents, scripts, style sheets, images,...
-    * Flexible craswl, you decide the number of threads, the timeout between requests, the crawl depth or the user agent.
-    * Generate path diccionary and add it to you personal dictionary for directory fuzzing.
-    * Stop the crawler whenever you want, you will get the routes obtained until that moment.
+- Obtain all web pages in seconds.
+- Distinguish between pages, documents, scripts, style sheets, images,...
+- Flexible craswl, you decide the number of threads, the timeout between requests, the crawl depth or the user agent.
+- Generate path diccionary and add it to you personal dictionary for directory fuzzing.
+- Stop the crawler whenever you want, you will get the routes obtained until that moment.
 
 ## Installation
 ```sh
