@@ -4,7 +4,7 @@ Don't Run Away From Me is a fast multi-threading Python 3 web crawler.
 It's features include:
 - Obtain all web pages in seconds.
 - Distinguish between pages, documents, scripts, style sheets, images,...
-- Flexible crawl, you decide the number of threads, the timeout between requests, the crawl depth or the user agent.
+- Flexible crawl, you decide the number of threads, the timeout between requests, the crawl depth, the user agent or the headers.
 - Generate a path diccionary and add it to your personal dictionary for future directory fuzzings.
 - Stop the crawler whenever you want, you will get the routes obtained until that moment.
 
@@ -47,6 +47,14 @@ Useful for future directory fuzzings.
 ```sh
 $ python3 DRAFMe.py  -do dictionary.txt --check
 ````
+
+### Play with the directories
+Sometimes the main page is in one directory and then all the resources in a diferent one. This option will force the root directory for the next requests.
+Furthermore, you can specify directories you do not want to crawl.
+```sh
+$ python3 DRAFME.py -a -R "/" -A "/media/" https://example.com/example
+```
+
 ### Customize options
 This will perform a recursive crawl with the options given, including the crawling depth, the timeout between requests and the number of simultaneous threads. Customize your own User Agent or add specific headers.
 ```sh
@@ -59,7 +67,7 @@ If you don't believe this tool works (sometimes i really don't) use the verbose 
 $ python3 DRAFME.py -a -r 2 -s 200 -t 100 -v https://example.com
 ```
 ## TO DO
-Option to avoid crawl specific directories
+Take a nap ***zzzZZZ***
 
 ## Author 
 n0t4u

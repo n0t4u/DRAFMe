@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 #Author: n0t4u
-#Version: 1.0.1
+#Version: 1.1.0
 
 #TODO
-#Avoid directories to be crawled
+#Take a nap zzzZZZ
 
 #Imports
 from bs4 import BeautifulSoup
@@ -99,7 +99,7 @@ class Spider(object):
 			if newRoute not in self.routes:
 				self.routes.append(newRoute)
 				#if re.search(crawlRoot,newRoute):
-				print(newRoute)
+				#print(newRoute)
 				if re.match(crawlRoot,newRoute):
 					self.toCrawl.append(newRoute)
 		except Exception as e:
@@ -255,14 +255,14 @@ class Spider(object):
 #Functions
 def header():
 	print("""
-	 ______  _____          ______ __  __       
-	|____  \|  __ \   /\   |  ____|  \/  |      
-	 _   |  | |__) | /  \  | |__  | \  / | ___  
-	|_|  |  |  _  / / /\ \ |  __| | |\/| |/ _ \ 
-	 ____|  | | \ \/ ____ \| |    | |  | |  __/ 
-	|______/|_|  \/_/    \_\_|    |_|  | |\___| 
-	                                   | |      
-	                     This is n0t4u |_|      
+	 ______  _____          ______ __  __        
+	|____  \|  __ \   /\   |  ____|  \/  |       
+	 _   |  | |__) | /  \  | |__  | \  / | ___   
+	|_|  |  |  _  / / /\ \ |  __| | |\/| |/ _ \  
+	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
+	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
+	                                   | |       
+	                     This is n0t4u |_| v.1.1.0
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -407,7 +407,8 @@ def getURLsRecursive(html,url):
 				if re.search(r'\.(pdf|doc[x]?|odt|xls[x]?|sxc|txt|rft)$',newRoute,re.IGNORECASE):
 					spider.newDocument(newRoute)
 				else:
-					spider.newRouteToCrawl(newRoute)
+					if args.avoid and not re.search(args.avoid[0],newRoute):
+						spider.newRouteToCrawl(newRoute)
 		if args.all:
 			getMisc(soup,url)
 			getForms(soup)
@@ -546,6 +547,7 @@ parser.add_argument("-o","--output",dest="output",help="Output file.", nargs = 1
 parser.add_argument("-U","--userAgent",dest="userAgent", help="User Agent for cURL requests. Random by default.",nargs=1)
 parser.add_argument("-R","--root",dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
 parser.add_argument("-H","--header",dest="header",help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
+parser.add_argument("-A","--avoid", dest="avoid",help="Route to avoid to crawl.",nargs=1)
 sessiongroup= parser.add_mutually_exclusive_group()
 sessiongroup.add_argument("-l","--login",dest="login",help="Login credentials. Use $ for CSRF token. (EXPERIMENTAL)\n Example: \"username=n0t4u&pwd=n0t4u&csrf_token=$\"", nargs=1, default=[0])
 sessiongroup.add_argument("-c","--cookie",dest="cookie", help="Session cookie", nargs=1)
