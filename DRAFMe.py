@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #Author: n0t4u
-#Version: 1.0.0
+#Version: 1.0.1
 
 #TODO
 #Avoid directories to be crawled
@@ -55,6 +55,7 @@ userAgents = [
 userAgent = userAgents[random.randint(0,len(userAgents)-1)]
 
 cookies = "cookies.txt"
+headers=[]
 crawlRoot=""
 
 class Spider(object):
@@ -188,7 +189,7 @@ class Spider(object):
 	def printRoutes(self):
 		#print("\n")
 		self.routes.sort()
-		print(colored("[*]","yellow"),"Discovered %d differents routes" %self.getTotal())
+		print(colored("[*]","yellow"),"Discovered %d different routes" %self.getTotal())
 		for route in range(len(self.routes)):
 			print(colored("["+str(route+1)+"]","green").ljust(14," "),self.routes[route])
 		print(colored("--------------------------------------------------","blue"))
@@ -260,8 +261,8 @@ def header():
 	|_|  |  |  _  / / /\ \ |  __| | |\/| |/ _ \ 
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/ 
 	|______/|_|  \/_/    \_\_|    |_|  | |\___| 
-	                                  | |      
-	                    This is n0t4u |_|      
+	                                   | |      
+	                     This is n0t4u |_|      
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -277,11 +278,11 @@ def curlRequest(url):
 		c.setopt(pycurl.SSL_VERIFYHOST, False)
 		c.setopt(c.WRITEFUNCTION,buffer.write)
 		c.setopt(pycurl.USERAGENT,userAgent) #Change if more UserAgents are added
+		c.setopt(pycurl.HTTPHEADER,headers)
 		c.setopt(pycurl.COOKIEJAR, cookies)
 		c.setopt(pycurl.COOKIEFILE, cookies)
 		c.perform()
 		c.close()
-		
 		body= buffer.getvalue()
 		return body.decode('iso-8859-1')
 	except Exception as e:
@@ -470,7 +471,7 @@ def getMisc(soup,url):
 				newRoute= url+"/"+newRoute.lstrip("/")
 			newRoute = newRoute.replace(" ","%20")
 			spider.newCSS(newRoute)
-		elif newRoute and re.search(r'\.ico',newRoute):
+		elif newRoute and re.search(r'\.(ico|jp[e]?g|png|svg)',newRoute):
 			if not re.search(r'http[s]?\:\/\/',newRoute):
 				newRoute= url+"/"+newRoute.lstrip("/")
 			newRoute = newRoute.replace(" ","%20")
@@ -544,6 +545,7 @@ parser.add_argument("-v","--verbose",dest="verbose", help="Verbose mode.", actio
 parser.add_argument("-o","--output",dest="output",help="Output file.", nargs = 1)
 parser.add_argument("-U","--userAgent",dest="userAgent", help="User Agent for cURL requests. Random by default.",nargs=1)
 parser.add_argument("-R","--root",dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
+parser.add_argument("-H","--header",dest="header",help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
 sessiongroup= parser.add_mutually_exclusive_group()
 sessiongroup.add_argument("-l","--login",dest="login",help="Login credentials. Use $ for CSRF token. (EXPERIMENTAL)\n Example: \"username=n0t4u&pwd=n0t4u&csrf_token=$\"", nargs=1, default=[0])
 sessiongroup.add_argument("-c","--cookie",dest="cookie", help="Session cookie", nargs=1)
@@ -566,6 +568,8 @@ if __name__ == '__main__':
 	startTime = time.time()
 	if args.verbose:
 		logging.basicConfig(level=logging.INFO)
+	if args.header:
+		headers = args.header[0].split(",")
 	spider = Spider()
 	spider.newRoute(args.url[0])
 	rootDomain= urlparse(args.url[0])

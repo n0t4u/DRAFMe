@@ -48,9 +48,9 @@ Useful for future directory fuzzings.
 $ python3 DRAFMe.py  -do dictionary.txt --check
 ````
 ### Customize options
-This will perform a recursive crawl with the options given, including the crawling depth, the timeout between requests and th number of simultaneous threads. Customize your own User Agent.
+This will perform a recursive crawl with the options given, including the crawling depth, the timeout between requests and the number of simultaneous threads. Customize your own User Agent or add specific headers.
 ```sh
-$ python3 DRAFME.py -a -r 2 -s 200 -t 10 -U "Mozilla/5.0 n0t4u" https://example.com
+$ python3 DRAFME.py -a -r 2 -s 200 -t 10 -U "Mozilla/5.0 n0t4u" -H "Authorization: Bearer <n0t4u>" https://example.com
 ```
 
 ### Verbose mode
