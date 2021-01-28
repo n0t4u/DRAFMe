@@ -6,6 +6,7 @@
 
 #TODO
 #Take a nap zzzZZZ
+#Oh yes! Check routes in comments
 
 #Imports
 from bs4 import BeautifulSoup
@@ -432,9 +433,9 @@ def robots():
 				try:
 					spider.newRoute(rootDomain.scheme+"://"+rootDomain.netloc.rstrip("/")+re.split(r':\s+',route,maxsplit=1)[1].rstrip("/"))
 				except Exception as e:
-					logging.debug("[Exception]",e)
+					logging.debug("[Exception] %s" %e)
 	else:
-		logging.info("[!] No robots detected")
+		print(colored("[!] No robots detected","yellow"))
 	return
 
 def sitemap():
@@ -442,21 +443,27 @@ def sitemap():
 	sitemapUrl = rootDomain.scheme+"://"+rootDomain.netloc.rstrip("/")+"/sitemap.xml"
 	logging.info("[*] "+sitemapUrl)
 	req = urllib.request.Request(sitemapUrl,headers={'User-Agent':userAgent})
-	response = urllib.request.urlopen(req)
-	soup = BeautifulSoup(response,"lxml")
-	if sitemap and args.recursive:
-		for route in soup.find_all("loc"):
-			r1 = re.sub(r"^[\s]+","",route.text)
-			r2 = re.sub(r"[\s]+$","",r1)
-			spider.newRouteToCrawl(r2)
-	elif sitemap:
-		for route in soup.find_all("loc"):
-			r1 = re.sub(r"^[\s]+","",route.text)
-			r2 = re.sub(r"[\s]+$","",r1)
-			print(r2)
-			spider.newRoute(r2)
+	try:
+		response = urllib.request.urlopen(req)
+	except OSError as e:
+		print(colored("[!] No sitemap detected","yellow"))
+	except Exception as e:
+		logging.debug("[Error] %s" %e)
 	else:
-		logging.info("[!] No sitemap detected.")
+		soup = BeautifulSoup(response,"lxml")
+		if sitemap and args.recursive:
+			for route in soup.find_all("loc"):
+				r1 = re.sub(r"^[\s]+","",route.text)
+				r2 = re.sub(r"[\s]+$","",r1)
+				spider.newRouteToCrawl(r2)
+		elif sitemap:
+			for route in soup.find_all("loc"):
+				r1 = re.sub(r"^[\s]+","",route.text)
+				r2 = re.sub(r"[\s]+$","",r1)
+				print(r2)
+				spider.newRoute(r2)
+		else:
+			logging.info("[!] No sitemap detected.")
 	return
 
 def getMisc(soup,url):

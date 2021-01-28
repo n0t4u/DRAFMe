@@ -68,6 +68,7 @@ $ python3 DRAFME.py -a -r 2 -s 200 -t 100 -v https://example.com
 ```
 ## TO DO
 Take a nap ***zzzZZZ***
+And then check routes in comments
 
 ## Author 
 n0t4u
