@@ -408,7 +408,9 @@ def getURLsRecursive(html,url):
 				if re.search(r'\.(pdf|doc[x]?|odt|xls[x]?|sxc|txt|rft)$',newRoute,re.IGNORECASE):
 					spider.newDocument(newRoute)
 				else:
-					if args.avoid and not re.search(args.avoid[0],newRoute):
+					if not args.avoid:
+						spider.newRouteToCrawl(newRoute)
+					elif args.avoid and not re.search(args.avoid[0],newRoute):
 						spider.newRouteToCrawl(newRoute)
 		if args.all:
 			getMisc(soup,url)

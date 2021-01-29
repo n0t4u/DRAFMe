@@ -50,7 +50,7 @@ $ python3 DRAFMe.py  -do dictionary.txt --check
 
 ### Play with the directories
 Sometimes the main page is in one directory and then all the resources in a diferent one. This option will force the root directory for the next requests.
-Furthermore, you can specify directories you do not want to crawl.
+Furthermore, you can specify directories you do not want to crawl. (Note. The more specific the subdirectory it is, the more restrictive it works this option. The routes will still appear in the results, but no crawling will be done inside them).
 ```sh
 $ python3 DRAFME.py -a -R "/" -A "/media/" https://example.com/example
 ```
