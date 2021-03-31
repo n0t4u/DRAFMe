@@ -99,9 +99,8 @@ class Spider(object):
 		try:
 			if newRoute not in self.routes:
 				self.routes.append(newRoute)
-				#if re.search(crawlRoot,newRoute):
-				#print(newRoute)
-				if re.match(crawlRoot,newRoute):
+				#if re.match(crawlRoot,newRoute):
+				if re.search(crawlRoot,newRoute) and not re.search(r'logout',newRoute):
 					self.toCrawl.append(newRoute)
 		except Exception as e:
 			#raise e
