@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #Author: n0t4u
-#Version: 1.1.0
+#Version: 1.1.1
 
 #TODO
 #Take a nap zzzZZZ
@@ -99,7 +99,6 @@ class Spider(object):
 		try:
 			if newRoute not in self.routes:
 				self.routes.append(newRoute)
-				#if re.match(crawlRoot,newRoute):
 				if re.search(crawlRoot,newRoute) and not re.search(r'logout',newRoute):
 					self.toCrawl.append(newRoute)
 		except Exception as e:
@@ -262,7 +261,7 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.1.0
+	                     This is n0t4u |_| v.1.1.1
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -461,7 +460,7 @@ def sitemap():
 			for route in soup.find_all("loc"):
 				r1 = re.sub(r"^[\s]+","",route.text)
 				r2 = re.sub(r"[\s]+$","",r1)
-				print(r2)
+				#print(r2)
 				spider.newRoute(r2)
 		else:
 			logging.info("[!] No sitemap detected.")
@@ -532,14 +531,16 @@ def recursiveCrawl(spider,url):
 				logging.info(" %d routes left \t%s" %(len(spider.toCrawl),route))
 				getURLsRecursive(html,url)
 
-def generateDictionary():
+def generateDictionary(spider,url):
 	globalList = spider.routes +spider.documents+spider.css +spider.javascript +spider.sources
+	logging.info(len(globalList))
 	for route in globalList:
-		directories = route.lstrip("https://").lstrip("http://").split("/")
-		directories.pop(0)
-		for d in directories:
-			if not d in dictionary and not re.search(r'.(pdf|doc[x]?|htm[l]?|asp[x]?|php|jp[e]?g|png|svg|js|css|ico|jsp)$',d):
-				dictionary.append(d)
+		if re.search(url,route):
+			directories = route.lstrip("https://").lstrip("http://").split("/")
+			directories.pop(0)
+			for d in directories:
+				if not d in dictionary and not re.search(r'.(pdf|doc[x]?|htm[l]?|asp[x]?|php|jp[e]?g|png|svg|js|css|ico|jsp)$',d):
+					dictionary.append(d)
 	dictionary.sort()
 
 
@@ -638,13 +639,14 @@ if __name__ == '__main__':
 	print(colored("[»] Crawling ended","green"))
 	if args.dictionary:
 		print(colored("[*] Creating path dictionary...","blue"))
-		generateDictionary()
+		generateDictionary(spider,url)
+		logging.info (dictionary)
 		for word in dictionary:
 			print(word)
 		print(colored("[*]","blue"),"Discovered %d different paths" % len(dictionary))
 	elif args.dOutput:
 		print(colored("[*]","blue"),"Creating path dictionary...")
-		generateDictionary()
+		generateDictionary(spider,url)
 		if args.check:
 			try:
 				print(colored("[*]","blue"),"Discovered %d different paths" % len(dictionary))
@@ -687,7 +689,8 @@ if __name__ == '__main__':
 		spider.printRoutes()
 		spider.printMisc()
 	try:
-		os.remove(cookies)
+		if not args.cookieFile:
+			os.remove(cookies)
 	except Exception as e:
 		pass
 	executionTime = time.time()- startTime
