@@ -75,3 +75,6 @@ n0t4u
 
 ## License
 GNU General Public License Version 3
+
+## Disclaimer
+This tool is only purposed for Ethical Hacking audits. This tool will ignore robots.txt. The author is not responsible for any use by third parties.
