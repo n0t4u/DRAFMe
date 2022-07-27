@@ -289,7 +289,7 @@ def curlRequest(url):
 			print(colored("Unable to connect with the specified domain.\nCheck is URL is correctly written.\n[NOTE] It is possible that a network security system is blocking the requests (Firewall/IPS)\n","red")+ colored("[ERROR] %s","yellow") % e.args[1])
 			sys.exit(0)
 		else:
-			#raise e
+			logging.debug(e)
 			return False
 
 def curlLoginRequest(url,credentials,csrf):
@@ -315,7 +315,7 @@ def curlLoginRequest(url,credentials,csrf):
 		
 		body= buffer.getvalue()
 		f = open("cookie.txt","r")
-		print(body.decode('iso-8859-1'))
+		#print(body.decode('iso-8859-1'))
 		return body.decode('iso-8859-1')
 	except Exception as e:
 		if e.args[0]==6:
@@ -413,6 +413,44 @@ def getURLsRecursive(html,url):
 		if args.all:
 			getMisc(soup,url)
 			getForms(soup)
+
+def getAPIURLsRecursive(html,url):
+	try:
+		urls=re.findall(r'http[s]?:\/\/[^\"]+',html,re.I)
+	except Exception as e:
+		logging.exception(e)
+	else:
+		for newRoute in urls:
+			if re.search(r'[#?]',newRoute):
+				newRoute= re.split(r'[#?]',newRoute)[0]
+			elif re.search(r'javascript:',newRoute):
+				if re.search(r'javascript:(next|window\.open)\([\"\']{1}',newRoute):
+					newRoute = re.split(r'javascript:(next|window\.open)\([\"\']{1}',newRoute)[1]
+				else:
+					continue
+			elif re.search(r'mailto:',newRoute):
+				newRoute,mail = re.split(r'mailto:',newRoute,1)
+				spider.newMail(mail)
+			elif re.search(r'tel:',newRoute):
+				newRoute,phone=re.split(r'tel:',newRoute,1)
+				phone= phone.replace(" ","")
+				spider.newPhone(phone)
+			elif re.search(r'[\.\/]{1}$',newRoute):
+				if re.search(r'[\.\/]{2}$',newRoute):
+					newRoute = newRoute[:-2]
+				else:	
+					newRoute = newRoute[:-1]
+			if not re.search(r'http[s]?\:\/\/',newRoute):
+				newRoute= url+"/"+newRoute.strip("/")
+			newRoute = newRoute.replace(" ","%20")
+			if re.search(r'\.(pdf|doc[x]?|odt|xls[x]?|sxc|txt|rft)$',newRoute,re.IGNORECASE):
+				spider.newDocument(newRoute)
+			else:
+				if not args.avoid:
+					spider.newRouteToCrawl(newRoute)
+				elif args.avoid and not re.search(args.avoid[0],newRoute):
+					spider.newRouteToCrawl(newRoute)
+		return
 
 def robots():
 	print(colored("[»] Checking robots.txt...","green"))
@@ -521,6 +559,7 @@ def getForms(soup):
 			spider.newForm(newForm.lstrip("."))
 
 def recursiveCrawl(spider,url):
+	#logging.info(url)
 	for i in range(args.recursive):
 		for route in spider.toCrawl:
 			nextRoute= spider.getRoute(route)
@@ -529,7 +568,10 @@ def recursiveCrawl(spider,url):
 			if html:
 				logging.debug("%d\tThread %s %s" %(len(spider.toCrawl),threading.currentThread().getName(),route))
 				logging.info(" %d routes left \t%s" %(len(spider.toCrawl),route))
-				getURLsRecursive(html,url)
+				if args.api:
+					getAPIURLsRecursive(html,url)
+				else:
+					getURLsRecursive(html,url)
 
 def generateDictionary(spider,url):
 	globalList = spider.routes +spider.documents+spider.css +spider.javascript +spider.sources
@@ -557,6 +599,7 @@ parser.add_argument("-U","--userAgent",dest="userAgent", help="User Agent for cU
 parser.add_argument("-R","--root",dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
 parser.add_argument("-H","--header",dest="header",help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
 parser.add_argument("-A","--avoid", dest="avoid",help="Route to avoid to crawl.",nargs=1)
+parser.add_argument("--api", dest="api", help="Perform API crawler", action="store_true")
 sessiongroup= parser.add_mutually_exclusive_group()
 sessiongroup.add_argument("-l","--login",dest="login",help="Login credentials. Use $ for CSRF token. (EXPERIMENTAL)\n Example: \"username=n0t4u&pwd=n0t4u&csrf_token=$\"", nargs=1, default=[0])
 sessiongroup.add_argument("-c","--cookie",dest="cookie", help="Session cookie", nargs=1)
@@ -605,6 +648,7 @@ if __name__ == '__main__':
 		elif args.cookieFile:
 			cookies = args.cookieFile[0]
 		html= curlRequest(args.url[0])
+		#print(html)
 
 	if args.root:
 		if args.root[0] == "/":
@@ -620,7 +664,10 @@ if __name__ == '__main__':
 	sitemap()
 
 	if args.recursive:
-		getURLsRecursive(html,url)
+		if args.api:
+			getAPIURLsRecursive(html,url)
+		else:
+			getURLsRecursive(html,url)
 		try:
 			threads=[]
 			for i in range(args.threads[0]):

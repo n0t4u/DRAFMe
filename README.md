@@ -55,6 +55,12 @@ Furthermore, you can specify directories you do not want to crawl. (Note. The mo
 $ python3 DRAFME.py -a -R "/" -A "/media/" https://example.com/example
 ```
 
+### API Crawling
+In some cases, it is possible to get multiple routes from open API. Use the --api option to change the behaviour of the crawler.
+```sh
+$ python3 DRAFMe.py -a https://example.com --api
+````
+
 ### Customize options
 This will perform a recursive crawl with the options given, including the crawling depth, the timeout between requests and the number of simultaneous threads. Customize your own User Agent or add specific headers.
 ```sh

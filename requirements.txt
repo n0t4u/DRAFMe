@@ -1,5 +1,5 @@
 #Requirements file
-
 argparse
+beautifulsoup4
 pycurl
 termcolor
