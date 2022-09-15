@@ -1,5 +1,7 @@
 #Requirements file
 argparse
 beautifulsoup4
-pycurl
+requests
 termcolor
+lxml
+urllib3

@@ -73,8 +73,15 @@ If you don't believe this tool works (sometimes i really don't) use the verbose 
 $ python3 DRAFME.py -a -r 2 -s 200 -t 100 -v https://example.com
 ```
 ## TO DO
-Take a nap ***zzzZZZ***
-And then check routes in comments
+
+- Take a nap ***zzzZZZ***
+- And then check routes in comments.
+- Add proxy configuration
+
+## Note
+Main branch is a major update and now uses Python3 requests library.
+
+If you want to use an old, but fully operative, version with Pycurl library, check [pycurl-requests](https://github.com/n0t4u/DRAFMe/tree/pycurl-requests) branch.
 
 ## Author 
 n0t4u
@@ -83,4 +90,4 @@ n0t4u
 GNU General Public License Version 3
 
 ## Disclaimer
-This tool is only purposed for Ethical Hacking audits. This tool will ignore robots.txt. The author is not responsible for any use by third parties.
+This tool has been designed for Ethical Hacking audits and it can only be used with the authorization of the client. This tool will ignore robots.txt. The author is not responsible for any use by third parties.
