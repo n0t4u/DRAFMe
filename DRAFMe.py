@@ -279,12 +279,18 @@ def header():
 
 def curlRequest(url, session):
     try:
-        response = session.get(url, headers=headers, allow_redirects=True, verify=False, timeout=10, proxies=None)
+        response = session.get(url, headers=headers, allow_redirects=True, verify=False, timeout=args.timeout[0],
+                               proxies=None)
         return response.text
-    except requests.exceptions.TooManyRedirects as e:
-        print("Too Many Redirects for %s" % url)
+    except requests.exceptions.Timeout as timeout:
+        print("Resquest to %s took to long. Consider increase timeout." %url)
+        logging.debug(url, timeout)
         return False
-    except Exception as e:
+    except requests.exceptions.TooManyRedirects as redirects:
+        print("Too Many Redirects for %s" % url)
+        logging.debug(url, redirects)
+        return False
+    except requests.exceptions.RequestException as e:
         print(e)
         logging.debug(e)
         # print(colored("Unable to connect with the specified domain.\nCheck is URL is correctly written.\n[NOTE] It is possible that a network security system is blocking the requests (Firewall/IPS)\n", "red") + colored("[ERROR] %s", "yellow") % e.args[1])
@@ -571,15 +577,20 @@ parser.add_argument("-s", "--sleep", dest="sleep", help="Sleeping time , in mill
                     nargs=1, default=[0])
 parser.add_argument("-t", "--threads", dest="threads", help="Number of threads. 4 by default.", type=int, nargs=1,
                     default=[4])
-parser.add_argument("-v", "--verbose", dest="verbose", help="Verbose mode.", action="store_true")
+
 parser.add_argument("-o", "--output", dest="output", help="Output file.", nargs=1)
 parser.add_argument("-H", "--header", dest="header",
                     help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
 parser.add_argument("-U", "--userAgent", dest="userAgent", help="User Agent for cURL requests. Random by default.",
                     nargs=1)
+parser.add_argument("-T", "--timeout", dest="timeout", help="Set timeout for slow pages", nargs=1, type=int, default=10)
 parser.add_argument("-R", "--root", dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
 parser.add_argument("-A", "--avoid", dest="avoid", help="Route to avoid to crawl.", nargs=1)
 parser.add_argument("--api", dest="api", help="Perform API crawler", action="store_true")
+
+verbosegroup = parser.add_mutually_exclusive_group()
+verbosegroup.add_argument("-v", "--verbose", dest="verbose", help="Verbose mode.", action="store_true")
+verbosegroup.add_argument("-vv", "--vverbose", dest="vverbose", help="Even more verbose", action="store_true")
 
 urlsgroup = parser.add_mutually_exclusive_group()
 urlsgroup.add_argument("-u", "--urls", dest="urls", help="Print routes at the end of the rawling", action="store_true")
@@ -606,6 +617,9 @@ if __name__ == '__main__':
     # session.proxies = proxy
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
+        logging.captureWarnings(True)
+    elif args.vverbose:
+        logging.basicConfig(level=logging.DEBUG)
         logging.captureWarnings(True)
     # Setup of headers
     if args.header:
