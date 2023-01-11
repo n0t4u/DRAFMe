@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: n0t4u
-# Version: 1.2.0
+# Version: 1.2.1
 
 #TODO
 #Take a nap zzzZZZ
@@ -271,7 +271,7 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.2.0
+	                     This is n0t4u |_| v.1.2.1
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -551,6 +551,8 @@ def recursiveCrawl(spider, url, session):
                     getAPIURLsRecursive(html, url)
                 else:
                     getURLsRecursive(html, url)
+            else:
+                continue
 
 
 def generateDictionary(spider, url):
@@ -583,7 +585,7 @@ parser.add_argument("-H", "--header", dest="header",
                     help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
 parser.add_argument("-U", "--userAgent", dest="userAgent", help="User Agent for cURL requests. Random by default.",
                     nargs=1)
-parser.add_argument("-T", "--timeout", dest="timeout", help="Set timeout for slow pages", nargs=1, type=int, default=10)
+parser.add_argument("-T", "--timeout", dest="timeout", help="Set timeout for slow pages", nargs=1, type=int, default=[10])
 parser.add_argument("-R", "--root", dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
 parser.add_argument("-A", "--avoid", dest="avoid", help="Route to avoid to crawl.", nargs=1)
 parser.add_argument("--api", dest="api", help="Perform API crawler", action="store_true")
@@ -690,7 +692,7 @@ if __name__ == '__main__':
         if args.check:
             try:
                 print(colored("[*]", "blue"), "Discovered %d different paths" % len(dictionary))
-                with open(args.dOutput[0], "a+", encoding="iso-8859-1") as file:
+                with open(args.dOutput[0], "a+", encoding="utf-8") as file:
                     s = mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ)
                     counter = 0
                     for word in dictionary:
@@ -703,12 +705,16 @@ if __name__ == '__main__':
                 if e.args[0] == 13:
                     sys.exit(args.dOutput[0] + " " + colored(e.args[1], "red"))
                 else:
-                    print(colored("[ERROR]", "red"), "File does not exist.")
+                    #print(colored("[ERROR]", "red"), "File does not exist.")
+                    with open(args.dOutput[0], "w+", encoding="utf-8") as file:
+                        for word in dictionary:
+                            file.write(word + "\n")
+                    print(colored("[»] Dictionary created with %d new paths." % len(dictionary), "green"))
         else:
             try:
-                f = open(args.dOutput[0], "a+", encoding="iso-8859-1")
+                f = open(args.dOutput[0], "a+", encoding="utf-8")
             except:
-                f = open(args.dOutput[0], "w+", encoding="iso-8859-1")
+                f = open(args.dOutput[0], "w+", encoding="utf-8")
             finally:
                 for word in dictionary:
                     f.write(word + "\n")
@@ -717,11 +723,11 @@ if __name__ == '__main__':
     # Output results into file
     if args.output:
         logging.info(colored("[*]", "blue") + " File %s created" % args.output[0])
-        # f = open(args.output[0]+".txt","w", encoding="iso-8859-1") #Cambiar por "a"
-        with open(args.output[0], "w", encoding="iso-8859-1") as file:
+        # f = open(args.output[0]+".txt","w", encoding="utf-8") #Cambiar por "a"
+        with open(args.output[0], "w", encoding="utf-8") as file:
             globalList = spider.routes + spider.documents + spider.css + spider.javascript + spider.sources
             for route in globalList:
-                file.write(route + "\n")  # route.encode("iso-8859-1")
+                file.write(route + "\n")  # route.encode("utf-8")
         file.close()
         print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
     # Print only URLs.
