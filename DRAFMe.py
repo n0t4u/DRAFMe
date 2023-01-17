@@ -2,11 +2,21 @@
 # -*- coding: utf-8 -*-
 
 # Author: n0t4u
-# Version: 1.2.1
+# Version: 1.2.2
 
-#TODO
-#Take a nap zzzZZZ
-#Oh yes! Check routes in comments
+#TODO.
+# Check recursive
+# Consider import latest-user-agents https://pypi.org/project/latest-user-agents/
+# Add external resources links
+# Add metrics of analyzed routes --> Graph?
+# Add output option to split routes and resources in two files
+
+#TODO. Backlog
+# Detect JS versions
+# Selenium support
+# Add proxy support for Windows
+# Take a nap zzzZZZ
+# Oh yes! Check routes in comments
 
 # Imports
 from bs4 import BeautifulSoup
@@ -15,6 +25,7 @@ from termcolor import colored
 import logging
 # https://docs.python.org/3.7/library/mmap.html
 import mmap
+import os
 import random
 import re
 import requests
@@ -53,6 +64,7 @@ userAgents = [
 cookies = "cookies.txt"
 headers = {}
 crawlRoot = ""
+proxies = None
 
 
 class Spider(object):
@@ -271,7 +283,7 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.2.1
+	                     This is n0t4u |_| v.1.2.2
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -280,7 +292,7 @@ def header():
 def curlRequest(url, session):
     try:
         response = session.get(url, headers=headers, allow_redirects=True, verify=False, timeout=args.timeout[0],
-                               proxies=None)
+                               proxies=proxies)
         return response.text
     except requests.exceptions.Timeout as timeout:
         print("Resquest to %s took to long. Consider increase timeout." %url)
@@ -568,37 +580,41 @@ def generateDictionary(spider, url):
                     dictionary.append(d)
     dictionary.sort()
 
-
-# Main
 parser = argparse.ArgumentParser(description=header())
-
+#Positional arguments
 parser.add_argument("url", help="URL to crawl.", nargs=1)
+#Main options
 parser.add_argument("-r", "--recursive", dest="recursive", help="Recursive crawling. Number of depth crawl.", type=int,
                     choices=range(1, 6), default=0)
 parser.add_argument("-s", "--sleep", dest="sleep", help="Sleeping time , in milliseconds, between requests.", type=int,
                     nargs=1, default=[0])
 parser.add_argument("-t", "--threads", dest="threads", help="Number of threads. 4 by default.", type=int, nargs=1,
                     default=[4])
+parser.add_argument("-T", "--timeout", dest="timeout", help="Set timeout for slow pages (sec).", nargs=1, type=int, default=[10])
 
-parser.add_argument("-o", "--output", dest="output", help="Output file.", nargs=1)
+#Headers options
 parser.add_argument("-H", "--header", dest="header",
                     help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
 parser.add_argument("-U", "--userAgent", dest="userAgent", help="User Agent for cURL requests. Random by default.",
                     nargs=1)
-parser.add_argument("-T", "--timeout", dest="timeout", help="Set timeout for slow pages", nargs=1, type=int, default=[10])
+#Miscellaneous options
 parser.add_argument("-R", "--root", dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
 parser.add_argument("-A", "--avoid", dest="avoid", help="Route to avoid to crawl.", nargs=1)
 parser.add_argument("--api", dest="api", help="Perform API crawler", action="store_true")
+parser.add_argument("-P","--proxy", dest="proxies", help="Proxy with IP:PORT format (Crawling performance will reduce).", nargs=1)
+parser.add_argument("--cert",dest="cert", help="Proxy certificate path", nargs=1)
 
+#Verbose options
 verbosegroup = parser.add_mutually_exclusive_group()
 verbosegroup.add_argument("-v", "--verbose", dest="verbose", help="Verbose mode.", action="store_true")
 verbosegroup.add_argument("-vv", "--vverbose", dest="vverbose", help="Even more verbose", action="store_true")
 
+#Output options
 urlsgroup = parser.add_mutually_exclusive_group()
 urlsgroup.add_argument("-u", "--urls", dest="urls", help="Print routes at the end of the rawling", action="store_true")
 urlsgroup.add_argument("-a", "--all", dest="all", help="Print routes  and resources at the end of the crawling.",
                        action="store_true")
-
+parser.add_argument("-o", "--output", dest="output", help="Output file.", nargs=1)
 dictgroup = parser.add_mutually_exclusive_group()
 dictgroup.add_argument("-d", "--dictionary", dest="dictionary",
                        help="Generates a dictionary with all the paths detected and print them.", action="store_true")
@@ -611,18 +627,35 @@ parser.add_argument("--check", dest="check",
 
 args = parser.parse_args()
 
+#Main
 if __name__ == '__main__':
     startTime = time.time()
-    spider = Spider()
-    session = requests.session()
-    session.max_redirects = 5
-    # session.proxies = proxy
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
         logging.captureWarnings(True)
     elif args.vverbose:
         logging.basicConfig(level=logging.DEBUG)
         logging.captureWarnings(True)
+    spider = Spider()
+    session = requests.session()
+    session.max_redirects = 5
+    #Proxy configuration. https://requests.readthedocs.io/en/latest/user/advanced/
+    if args.proxies:
+        if os.name == 'nt':
+            print(colored("[!] Proxy functionality is not implemented yet for Windows.  Check README.md for more information.", "yellow"))
+            check = input('Do you want to continue with this proxy functionality? (yes/NO)')
+            if check.lower() == "yes":
+                http_proxy = 'http://%s' % args.proxies[0]
+                proxies = {'http': http_proxy, 'https': http_proxy}
+        else:
+            #Python requests configuration
+            http_proxy = 'http://%s' %args.proxies[0]
+            proxies = {'http': http_proxy,'https':http_proxy}
+            logging.info(colored("[*]","blue")+ "%s" %proxies)
+            #System configuration
+            certPath = args.cert[0] if args.cert else './cacert.pem'
+            command = "export HTTP_PROXY='%s';export HTTPS_PROXY='%s';export REQUESTS_CA_BUNDLE='%s'" %(http_proxy, http_proxy, certPath)
+            os.system(command)
     # Setup of headers
     if args.header:
         for header in args.header[0].split(","):
@@ -737,6 +770,9 @@ if __name__ == '__main__':
     elif args.all:
         spider.printRoutes()
         spider.printMisc()
+    if args.proxies and os.name != 'nt':
+        unsetCommand = "unset HTTP_PROXY HTTPS_PROXY REQUESTS_CA_BUNDLE"
+        os.system(unsetCommand)
     executionTime = time.time() - startTime
     if executionTime / 60 > 1:
         print(colored("--- %d secs --- (%d mins) ---" % (round(executionTime, 3), round(executionTime / 60, 3)),
