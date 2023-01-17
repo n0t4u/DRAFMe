@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 
 # Author: n0t4u
-# Version: 1.2.2
+# Version: 1.2.3
 
 #TODO.
 # Check recursive
 # Consider import latest-user-agents https://pypi.org/project/latest-user-agents/
 # Add external resources links
 # Add metrics of analyzed routes --> Graph?
-# Add output option to split routes and resources in two files
 
 #TODO. Backlog
 # Detect JS versions
@@ -283,7 +282,7 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.2.2
+	                     This is n0t4u |_| v.1.2.3
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -614,7 +613,11 @@ urlsgroup = parser.add_mutually_exclusive_group()
 urlsgroup.add_argument("-u", "--urls", dest="urls", help="Print routes at the end of the rawling", action="store_true")
 urlsgroup.add_argument("-a", "--all", dest="all", help="Print routes  and resources at the end of the crawling.",
                        action="store_true")
-parser.add_argument("-o", "--output", dest="output", help="Output file.", nargs=1)
+outputgroup = parser.add_mutually_exclusive_group()
+outputgroup.add_argument("-o", "--output", dest="output", help="Output results in one file.", nargs=1)
+outputgroup.add_argument("-oS", "--output-split", dest="outputSplit", help="Ouput results in two files, one for URLs and another for the rest of the routes (only valid with -a option).", nargs=1)
+outputgroup.add_argument("-oA", "--output-split-all", dest="outputSplitAll", help="Output results  in several files, each one with its resources (only valid with -a option).", nargs=1)
+
 dictgroup = parser.add_mutually_exclusive_group()
 dictgroup.add_argument("-d", "--dictionary", dest="dictionary",
                        help="Generates a dictionary with all the paths detected and print them.", action="store_true")
@@ -739,29 +742,83 @@ if __name__ == '__main__':
                     sys.exit(args.dOutput[0] + " " + colored(e.args[1], "red"))
                 else:
                     #print(colored("[ERROR]", "red"), "File does not exist.")
-                    with open(args.dOutput[0], "w+", encoding="utf-8") as file:
+                    with open(args.dOutput[0]+".txt", "w+", encoding="utf-8") as file:
                         for word in dictionary:
                             file.write(word + "\n")
+                        file.truncate(file.tell() - 1)
                     print(colored("[»] Dictionary created with %d new paths." % len(dictionary), "green"))
         else:
-            try:
-                f = open(args.dOutput[0], "a+", encoding="utf-8")
-            except:
-                f = open(args.dOutput[0], "w+", encoding="utf-8")
-            finally:
-                for word in dictionary:
-                    f.write(word + "\n")
-                f.close()
-                print(colored("[»] Dictionary created with %d new paths." % len(dictionary), "green"))
+            if os.path.isfile(args.dOutput[0]):
+                with open(args.dOutput[0],"a",encoding="utf-8") as file:
+                    for word in dictionary:
+                        file.write(word + "\n")
+                    file.truncate(file.tell() - 1)
+            else:
+                with open(args.dOutput[0]+".txt", "w", encoding="utf-8") as file:
+                    for word in dictionary:
+                        file.write(word + "\n")
+                    file.truncate(file.tell()-1)
+            print(colored("[»] Dictionary created with %d new paths." % len(dictionary), "green"))
     # Output results into file
     if args.output:
-        logging.info(colored("[*]", "blue") + " File %s created" % args.output[0])
         # f = open(args.output[0]+".txt","w", encoding="utf-8") #Cambiar por "a"
-        with open(args.output[0], "w", encoding="utf-8") as file:
+        with open(args.output[0]+".txt", "w", encoding="utf-8") as file:
             globalList = spider.routes + spider.documents + spider.css + spider.javascript + spider.sources
             for route in globalList:
                 file.write(route + "\n")  # route.encode("utf-8")
         file.close()
+        logging.info(colored("[*]", "blue") + " File %s.txt created" % args.output[0])
+        print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
+    elif args.outputSplit:
+        with open(args.outputSplit[0]+"_routes.txt", "w", encoding="utf-8") as file:
+            for route in spider.routes:
+                file.write(route + "\n")  # route.encode("utf-8")
+            file.truncate(file.tell() - 1)
+        logging.info(colored("[*]", "blue") + " File %s_routes.txt created" % args.outputSplit[0])
+        if args.all:
+            with open(args.outputSplit[0]+"_resources.txt", "w", encoding="utf-8") as file:
+                resourcesList = spider.documents + spider.css + spider.javascript + spider.sources
+                for route in resourcesList:
+                    file.write(route + "\n")  # route.encode("utf-8")
+                file.truncate(file.tell() - 1)
+            logging.info(colored("[*]", "blue") + " File %s_resources.txt created" % args.outputSplit[0])
+        print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
+    elif args.outputSplitAll:
+        with open(args.outputSplitAll[0]+"_routes.txt", "w", encoding="utf-8") as file:
+            for route in spider.routes:
+                file.write(route + "\n")  # route.encode("utf-8")
+            file.truncate(file.tell() - 1)
+        logging.info(colored("[*]", "blue") + " File %s_routes.txt created" % args.outputSplitAll[0])
+        if args.all:
+            with open(args.outputSplitAll[0]+"_documents.txt", "w", encoding="utf-8") as file:
+                for route in spider.documents:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            with open(args.outputSplitAll[0]+"_css.txt", "w", encoding="utf-8") as file:
+                for route in spider.css:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            with open(args.outputSplitAll[0]+"_javascript.txt", "w", encoding="utf-8") as file:
+                for route in spider.javascript:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            with open(args.outputSplitAll[0]+"_images.txt", "w", encoding="utf-8") as file:
+                for route in spider.sources:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            with open(args.outputSplitAll[0]+"_forms.txt", "w", encoding="utf-8") as file:
+                for route in spider.forms:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            with open(args.outputSplitAll[0]+"_emails.txt", "w", encoding="utf-8") as file:
+                for route in spider.mails:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            with open(args.outputSplitAll[0]+"_phones.txt", "w", encoding="utf-8") as file:
+                for route in spider.phones:
+                    file.write(route + "\n")
+                file.truncate(file.tell() - 1)
+            logging.info(colored("[*]", "blue") + " Files %s_documents.txt, %s_css.txt, %s_javascript.txt, %s_images.txt, %s_forms.txt, %s_emails.txt and %s_phones.txt created" % (args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0]))
         print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
     # Print only URLs.
     if args.urls:

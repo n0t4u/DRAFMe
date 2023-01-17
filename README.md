@@ -38,7 +38,11 @@ $ python3 DRAFMe.py -d https://example.com
 ### Output the results
 This will perform a basic crawl and will store all the routes and the dictionary into the files you specified.
 ```sh
-$ python3 DRAFMe.py -o routes_file.txt -do dictionary.txt
+# Basic output
+$ python3 DRAFMe.py -o routes_file -do dictionary_file
+# Split output in several files base on its contents (see help)
+$ python3 DRAFMe.py -oS routes_file
+$ python3 DRAFMe.py -oA routes_file
 ````
 
 ### Store path dictionary into dictionary file
@@ -84,7 +88,7 @@ $ unset HTTP_PROXY HTTPS_PROXY REQUESTS_CA_BUNDLE
 
 References: https://requests.readthedocs.io/en/latest/user/advanced/#proxies
 
-**Note.** For Windows machines try to add the environmental variables manually ([Windows --> Edit system environment variables](https://docs.cloudfoundry.org/cf-cli/http-proxy.html#windows))
+**Note.** For Windows machines try to add the environmental variables manually ([Windows --> Edit system environment variables](https://docs.cloudfoundry.org/cf-cli/http-proxy.html#windows))([Self-Signed Certificates](https://docs.cloudfoundry.org/cf-cli/self-signed.html#windows))
 
 ### Verbose mode
 If you don't believe this tool works (sometimes i really don't) use the verbose mode to check that your computer is doing something useful.
@@ -97,7 +101,6 @@ $ python3 DRAFME.py -a -r 2 -s 200 -t 100 -v https://example.com
 ## TO DO
 - Add external resources links
 - Add metrics of analyzed routes --> Graph?
-- Add output option to split routes and resources in two files
 
 ### Backlog
 - Detect JS versions
