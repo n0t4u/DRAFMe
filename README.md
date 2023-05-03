@@ -11,10 +11,11 @@ It's features include:
 ## Installation
 Simple installation, simple usage
 ```sh
-$ git clone https://github.com/n0t4u/DRAFMe.git
-$ cd DRAFMe
-$ python3 -m pip install -r requirements.txt
+$ sudo git clone https://github.com/n0t4u/DRAFMe.git /opt/DRAFMe
+$ cd /opt/DRAFMe
+$ sudo python3 -m pip install -r requirements.txt
 $ chmod +x DRAFMe.py
+$ (Optional) echo 'alias DRAFMe="python3 /opt/DRAFMe/DRAFMe.py"' >> ~/.zshrc
 ```
 ## Usage
 The only mandatory attribute is the FQDN of the domain you want to crawl.
