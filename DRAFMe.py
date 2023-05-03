@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: n0t4u
-# Version: 1.2.3
+# Version: 1.2.4
 
 #TODO.
 # Check recursive
@@ -282,7 +282,7 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.2.3
+	                     This is n0t4u |_| v.1.2.4
 	
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -371,7 +371,7 @@ def getURLsRecursive(html, url):
                     phone = phone.replace(" ", "")
                     spider.newPhone(phone)
                 elif re.search(r'[\./]$', newRoute):
-                    if re.search(r'[\./]$', newRoute):
+                    if re.search(r'[\./]{2}$', newRoute):
                         newRoute = newRoute[:-2]
                     else:
                         newRoute = newRoute[:-1]
@@ -668,7 +668,7 @@ if __name__ == '__main__':
     rootDomain = urlparse(args.url[0])
     crawlRoot = rootDomain.netloc + rootDomain.path.rstrip("/")
     if not rootDomain.scheme:
-        sys.exit(colored("FQDN must be give. https://n0t4u.com", "red"))
+        sys.exit(colored("FQDN must be given. https://n0t4u.com", "red"))
     print(colored("[»] Starting crawling...", "green"))
     # Setup of User-Agent
     if args.userAgent:
