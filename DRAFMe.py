@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: n0t4u
-# Version: 1.2.4
+# Version: 1.2.5
 
 #TODO.
 # Check recursive
@@ -282,8 +282,8 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.2.4
-	
+	                     This is n0t4u |_| v.1.2.5
+
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
 
@@ -294,7 +294,7 @@ def curlRequest(url, session):
                                proxies=proxies)
         return response.text
     except requests.exceptions.Timeout as timeout:
-        print("Resquest to %s took to long. Consider increase timeout." %url)
+        print("Resquest to %s took to long. Consider increase timeout." % url)
         logging.debug(url, timeout)
         return False
     except requests.exceptions.TooManyRedirects as redirects:
@@ -579,10 +579,11 @@ def generateDictionary(spider, url):
                     dictionary.append(d)
     dictionary.sort()
 
+
 parser = argparse.ArgumentParser(description=header())
-#Positional arguments
+# Positional arguments
 parser.add_argument("url", help="URL to crawl.", nargs=1)
-#Main options
+# Main options
 parser.add_argument("-r", "--recursive", dest="recursive", help="Recursive crawling. Number of depth crawl.", type=int,
                     choices=range(1, 6), default=0)
 parser.add_argument("-s", "--sleep", dest="sleep", help="Sleeping time , in milliseconds, between requests.", type=int,
@@ -591,24 +592,24 @@ parser.add_argument("-t", "--threads", dest="threads", help="Number of threads. 
                     default=[4])
 parser.add_argument("-T", "--timeout", dest="timeout", help="Set timeout for slow pages (sec).", nargs=1, type=int, default=[10])
 
-#Headers options
+# Headers options
 parser.add_argument("-H", "--header", dest="header",
                     help="Add headers given to the request.\nExample:\"Authorization: Bearer <>,Cookie: <>\"", nargs=1)
 parser.add_argument("-U", "--userAgent", dest="userAgent", help="User Agent for cURL requests. Random by default.",
                     nargs=1)
-#Miscellaneous options
+# Miscellaneous options
 parser.add_argument("-R", "--root", dest="root", help="Root path for all the requests \n Example: www/ o /", nargs=1)
 parser.add_argument("-A", "--avoid", dest="avoid", help="Route to avoid to crawl.", nargs=1)
 parser.add_argument("--api", dest="api", help="Perform API crawler", action="store_true")
-parser.add_argument("-P","--proxy", dest="proxies", help="Proxy with IP:PORT format (Crawling performance will reduce).", nargs=1)
-parser.add_argument("--cert",dest="cert", help="Proxy certificate path", nargs=1)
+parser.add_argument("-P", "--proxy", dest="proxies", help="Proxy with IP:PORT format (Crawling performance will reduce).", nargs=1)
+parser.add_argument("--cert", dest="cert", help="Proxy certificate path", nargs=1)
 
-#Verbose options
+# Verbose options
 verbosegroup = parser.add_mutually_exclusive_group()
 verbosegroup.add_argument("-v", "--verbose", dest="verbose", help="Verbose mode.", action="store_true")
 verbosegroup.add_argument("-vv", "--vverbose", dest="vverbose", help="Even more verbose", action="store_true")
 
-#Output options
+# Output options
 urlsgroup = parser.add_mutually_exclusive_group()
 urlsgroup.add_argument("-u", "--urls", dest="urls", help="Print routes at the end of the rawling", action="store_true")
 urlsgroup.add_argument("-a", "--all", dest="all", help="Print routes  and resources at the end of the crawling.",
@@ -630,7 +631,7 @@ parser.add_argument("--check", dest="check",
 
 args = parser.parse_args()
 
-#Main
+# Main
 if __name__ == '__main__':
     startTime = time.time()
     if args.verbose:
@@ -642,7 +643,7 @@ if __name__ == '__main__':
     spider = Spider()
     session = requests.session()
     session.max_redirects = 5
-    #Proxy configuration. https://requests.readthedocs.io/en/latest/user/advanced/
+    # Proxy configuration. https://requests.readthedocs.io/en/latest/user/advanced/
     if args.proxies:
         if os.name == 'nt':
             print(colored("[!] Proxy functionality is not implemented yet for Windows.  Check README.md for more information.", "yellow"))
@@ -651,13 +652,13 @@ if __name__ == '__main__':
                 http_proxy = 'http://%s' % args.proxies[0]
                 proxies = {'http': http_proxy, 'https': http_proxy}
         else:
-            #Python requests configuration
-            http_proxy = 'http://%s' %args.proxies[0]
-            proxies = {'http': http_proxy,'https':http_proxy}
-            logging.info(colored("[*]","blue")+ "%s" %proxies)
-            #System configuration
+            # Python requests configuration
+            http_proxy = 'http://%s' % args.proxies[0]
+            proxies = {'http': http_proxy, 'https': http_proxy}
+            logging.info(colored("[*]", "blue") + "%s" % proxies)
+            # System configuration
             certPath = args.cert[0] if args.cert else './cacert.pem'
-            command = "export HTTP_PROXY='%s';export HTTPS_PROXY='%s';export REQUESTS_CA_BUNDLE='%s'" %(http_proxy, http_proxy, certPath)
+            command = "export HTTP_PROXY='%s';export HTTPS_PROXY='%s';export REQUESTS_CA_BUNDLE='%s'" % (http_proxy, http_proxy, certPath)
             os.system(command)
     # Setup of headers
     if args.header:
@@ -687,6 +688,10 @@ if __name__ == '__main__':
         url = rootDomain.scheme + "://" + rootDomain.netloc + "/" + rootDomain.path.strip("/")
     else:
         url = rootDomain.scheme + "://" + rootDomain.netloc.rstrip("/")
+    # Start active execution
+    startExecution = "[*] DRAFMe started '%s' command at %s." % (" ".join(sys.argv[:]).lstrip(" "), time.strftime("%a, %d %b %Y %H:%M:%S"))
+    logging.info(startExecution)
+
     # Obtain information from robots.txt and sitemap.xml files
     robots(rootDomain, session)
     sitemap(rootDomain)
@@ -712,6 +717,9 @@ if __name__ == '__main__':
         if htmlResponse:
             getURLs(htmlResponse, url)
     print(colored("[»] Crawling ended", "green"))
+
+    stopExecution = "[*] DRAFMe finished '%s' command at %s." % (" ".join(sys.argv[:]).lstrip(" "), time.strftime("%a, %d %b %Y %H:%M:%S"))
+    logging.info(stopExecution)
     # Generate dictionary
     if args.dictionary:
         print(colored("[*] Creating path dictionary...", "blue"))
@@ -741,84 +749,106 @@ if __name__ == '__main__':
                 if e.args[0] == 13:
                     sys.exit(args.dOutput[0] + " " + colored(e.args[1], "red"))
                 else:
-                    #print(colored("[ERROR]", "red"), "File does not exist.")
-                    with open(args.dOutput[0]+".txt", "w+", encoding="utf-8") as file:
+                    # print(colored("[ERROR]", "red"), "File does not exist.")
+                    with open(args.dOutput[0] + ".txt", "w+", encoding="utf-8") as file:
                         for word in dictionary:
                             file.write(word + "\n")
                         file.truncate(file.tell() - 1)
                     print(colored("[»] Dictionary created with %d new paths." % len(dictionary), "green"))
         else:
             if os.path.isfile(args.dOutput[0]):
-                with open(args.dOutput[0],"a",encoding="utf-8") as file:
+                with open(args.dOutput[0], "a", encoding="utf-8") as file:
                     for word in dictionary:
                         file.write(word + "\n")
                     file.truncate(file.tell() - 1)
             else:
-                with open(args.dOutput[0]+".txt", "w", encoding="utf-8") as file:
+                with open(args.dOutput[0] + ".txt", "w", encoding="utf-8") as file:
                     for word in dictionary:
                         file.write(word + "\n")
-                    file.truncate(file.tell()-1)
+                    file.truncate(file.tell() - 1)
             print(colored("[»] Dictionary created with %d new paths." % len(dictionary), "green"))
     # Output results into file
     if args.output:
         # f = open(args.output[0]+".txt","w", encoding="utf-8") #Cambiar por "a"
-        with open(args.output[0]+".txt", "w", encoding="utf-8") as file:
+        with open(args.output[0] + ".txt", "w", encoding="utf-8") as file:
+            file.write(startExecution + "\n\n")
             globalList = spider.routes + spider.documents + spider.css + spider.javascript + spider.sources
             for route in globalList:
                 file.write(route + "\n")  # route.encode("utf-8")
+            file.write("\n" + stopExecution)
         file.close()
         logging.info(colored("[*]", "blue") + " File %s.txt created" % args.output[0])
         print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
     elif args.outputSplit:
-        with open(args.outputSplit[0]+"_routes.txt", "w", encoding="utf-8") as file:
+        with open(args.outputSplit[0] + "_routes.txt", "w", encoding="utf-8") as file:
+            file.write(startExecution + "\n\n")
             for route in spider.routes:
                 file.write(route + "\n")  # route.encode("utf-8")
-            file.truncate(file.tell() - 1)
+            # file.truncate(file.tell() - 1)
+            file.write("\n" + stopExecution)
         logging.info(colored("[*]", "blue") + " File %s_routes.txt created" % args.outputSplit[0])
         if args.all:
-            with open(args.outputSplit[0]+"_resources.txt", "w", encoding="utf-8") as file:
+            with open(args.outputSplit[0] + "_resources.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 resourcesList = spider.documents + spider.css + spider.javascript + spider.sources
                 for route in resourcesList:
                     file.write(route + "\n")  # route.encode("utf-8")
-                file.truncate(file.tell() - 1)
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
             logging.info(colored("[*]", "blue") + " File %s_resources.txt created" % args.outputSplit[0])
         print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
     elif args.outputSplitAll:
-        with open(args.outputSplitAll[0]+"_routes.txt", "w", encoding="utf-8") as file:
+        with open(args.outputSplitAll[0] + "_routes.txt", "w", encoding="utf-8") as file:
+            file.write(startExecution + "\n\n")
             for route in spider.routes:
                 file.write(route + "\n")  # route.encode("utf-8")
-            file.truncate(file.tell() - 1)
+            # file.truncate(file.tell() - 1)
+            file.write("\n" + stopExecution)
         logging.info(colored("[*]", "blue") + " File %s_routes.txt created" % args.outputSplitAll[0])
         if args.all:
-            with open(args.outputSplitAll[0]+"_documents.txt", "w", encoding="utf-8") as file:
+            with open(args.outputSplitAll[0] + "_documents.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.documents:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            with open(args.outputSplitAll[0]+"_css.txt", "w", encoding="utf-8") as file:
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            with open(args.outputSplitAll[0] + "_css.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.css:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            with open(args.outputSplitAll[0]+"_javascript.txt", "w", encoding="utf-8") as file:
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            with open(args.outputSplitAll[0] + "_javascript.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.javascript:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            with open(args.outputSplitAll[0]+"_images.txt", "w", encoding="utf-8") as file:
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            with open(args.outputSplitAll[0] + "_images.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.sources:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            with open(args.outputSplitAll[0]+"_forms.txt", "w", encoding="utf-8") as file:
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            with open(args.outputSplitAll[0] + "_forms.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.forms:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            with open(args.outputSplitAll[0]+"_emails.txt", "w", encoding="utf-8") as file:
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            with open(args.outputSplitAll[0] + "_emails.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.mails:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            with open(args.outputSplitAll[0]+"_phones.txt", "w", encoding="utf-8") as file:
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            with open(args.outputSplitAll[0] + "_phones.txt", "w", encoding="utf-8") as file:
+                file.write(startExecution + "\n\n")
                 for route in spider.phones:
                     file.write(route + "\n")
-                file.truncate(file.tell() - 1)
-            logging.info(colored("[*]", "blue") + " Files %s_documents.txt, %s_css.txt, %s_javascript.txt, %s_images.txt, %s_forms.txt, %s_emails.txt and %s_phones.txt created" % (args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0],args.outputSplitAll[0]))
+                # file.truncate(file.tell() - 1)
+                file.write("\n" + stopExecution)
+            logging.info(colored("[*]", "blue") + " Files %s_documents.txt, %s_css.txt, %s_javascript.txt, %s_images.txt, %s_forms.txt, %s_emails.txt and %s_phones.txt created" % (args.outputSplitAll[0], args.outputSplitAll[0], args.outputSplitAll[0], args.outputSplitAll[0],args.outputSplitAll[0], args.outputSplitAll[0], args.outputSplitAll[0]))
         print(colored("[*]", "blue"), "Discovered %d routes." % spider.getTotal())
     # Print only URLs.
     if args.urls:
