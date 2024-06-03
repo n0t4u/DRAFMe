@@ -282,7 +282,7 @@ def header():
 	 ____|  | | \ \/ ____ \| |    | |  | |  __/  
 	|______/|_|  \/_/    \_\_|    |_|  | |\___|  
 	                                   | |       
-	                     This is n0t4u |_| v.1.2.5
+	                     This is n0t4u |_| v.1.2.6
 
 
 	Pages, Don't Run Away From Me, I will find you all!!!\n""")
@@ -292,7 +292,7 @@ def curlRequest(url, session):
     try:
         response = session.get(url, headers=headers, allow_redirects=True, verify=False, timeout=args.timeout[0],
                                proxies=proxies)
-        return response.text
+        return response.content.decode('ISO-8859-1')
     except requests.exceptions.Timeout as timeout:
         print("Resquest to %s took to long. Consider increase timeout." % url)
         logging.debug(url, timeout)
